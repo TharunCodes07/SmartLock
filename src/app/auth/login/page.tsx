@@ -8,10 +8,10 @@ import { redirect } from 'next/navigation'
 import { getSession } from "@/lib/getSession"
 
 const Login = async () => {
-  const session = await getSession();
-  if (session?.user) {
-    redirect('/')
-  }
+  // const session = await getSession();
+  // if (session?.user) {
+  //   redirect('/')
+  // }
   return (
     <div className="flex min-h-[80vh] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md rounded-lg border bg-card p-8 shadow-sm transition-all">

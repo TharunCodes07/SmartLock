@@ -26,26 +26,7 @@ interface NavProps {
 }
 
 const Nav = ({ selectedUserId, onSelectUser }: NavProps) => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   
-  // Fetch users on component mount
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch('/api/users');
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(data);
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    
-    fetchUsers();
-  }, []);
-
   return (
     <header className="fixed top-0 left-0 right-0 h-14 border-b z-30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex items-center justify-between h-full px-4">

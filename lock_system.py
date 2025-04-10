@@ -23,15 +23,13 @@ async def send_video(camera_id, uri):
                 jpg_as_text = base64.b64encode(buffer).decode('utf-8')
                 # Send the frame to the server
                 await websocket.send(jpg_as_text)
-                await asyncio.sleep(0.1)  # Control frame rate (10 FPS)
+                await asyncio.sleep(0.1) 
     except Exception as e:
         print(f"Error: {e}")
     finally:
         cap.release()
 
-# Configuration
-camera_id = "lock1"  # Unique ID for this lock device
-uri = "ws://192.168.222.222:8765"  # Main server address
+camera_id = "lock1"
+uri = "ws://192.168.155.222:8765"
 
-# Run the video sender
 asyncio.run(send_video(camera_id, uri))

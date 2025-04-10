@@ -1,4 +1,3 @@
-// components/CameraView.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -12,8 +11,8 @@ export default function CameraView({ cameraId, onClose }: CameraViewProps) {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    // Connect to the WebSocket endpoint for this camera
-    const websocket = new WebSocket(`ws://localhost:8765/stream/${cameraId}`);
+    // Connect to the server's viewer endpoint for this camera
+    const websocket = new WebSocket(`wss://ef7a-2401-4900-6337-aaef-e90f-bb90-6966-59b6.ngrok-free.app/view/${cameraId}`);
 
     websocket.onmessage = (event) => {
       const jpgAsText = event.data;
@@ -26,6 +25,7 @@ export default function CameraView({ cameraId, onClose }: CameraViewProps) {
 
     websocket.onclose = () => {
       console.log('WebSocket connection closed');
+      setImageSrc(null); // Optional: Clear image when connection closes
     };
 
     // Cleanup on unmount

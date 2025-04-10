@@ -1,33 +1,35 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-model User {
-  id        String   @id @default(cuid())
-  userName  String   @unique
-  email     String   @unique
-  password  String
-  cameras   Camera[] // Links to cameras (lock devices)
-  family    Family[] // Links to family members
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
-model Camera {
-  id        String @id @default(cuid())
-  userId    String
-  user      User   @relation(fields: [userId], references: [id])
+model User {
+  id       String   @id @default(cuid())
+  email    String   @unique
+  userName String?
+  password String
+  family   Family[]
+  cameras  Camera[]
 }
 
 model Family {
-  id        String  @id @default(cuid())
-  name      String
-  email     String
-  imagePath String? // Stores the filename of the family member's image (e.g., "<family_id>.jpg")
-  status    String  @default("active")
-  userId    String
-  user      User    @relation(fields: [userId], references: [id])
+  id     String @id @default(cuid())
+  name   String
+  status String
+  email  String
+  userId String
+  image  String
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Camera {
+  id     String @id @default(cuid())
+  name   String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
 }
