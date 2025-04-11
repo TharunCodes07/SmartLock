@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import CameraView from "@/components/Camera"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,101 +8,73 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Eye, Loader2 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useQuery } from '@tanstack/react-query'
 
-// Interface for Camera (already present)
+// Interface for Camera
 interface Camera {
   id: string
   name: string
+  status: string
 }
 
-// Interface for Family (new, based on Prisma schema)
+// Interface for Family
 interface Family {
   id: string
   name: string
-  status: string
+  emotion: string
   email: string
 }
 
 export default function CamerasPage() {
-  // Existing camera states
-  const [cameras, setCameras] = useState<Camera[]>([])
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
-  // New family member states
-  const [familyMembers, setFamilyMembers] = useState<Family[]>([])
-  const [familyLoading, setFamilyLoading] = useState(true)
-  const [familyError, setFamilyError] = useState<string | null>(null)
-
-  // Fetch cameras and family members on mount
-  useEffect(() => {
-    // Fetch cameras (unchanged logic)
-    const fetchCameras = async () => {
-      try {
-        const response = await fetch("/api/cameras", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            setError("Unauthorized. Please log in.")
-            window.location.href = "/login" // Redirect to login
-            return
-          }
-          throw new Error("Failed to fetch cameras")
+  // Fetch cameras with TanStack Query
+  const { data: cameras, isLoading: loadingCameras, error: camerasError } = useQuery({
+    queryKey: ['cameras'],
+    queryFn: async () => {
+      const response = await fetch("/api/cameras", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = "/auth/login"
+          throw new Error("Unauthorized. Please log in.")
         }
-
-        const data: Camera[] = await response.json()
-        setCameras(data)
-      } catch (err) {
-        setError("An error occurred while fetching cameras.")
-        console.error(err)
-      } finally {
-        setLoading(false)
+        throw new Error("Failed to fetch cameras")
       }
-    }
+      return response.json()
+    },
+    refetchInterval: 120000 // Refetch every 1 minute
+  })
 
-    // Fetch family members (new logic)
-    const fetchFamily = async () => {
-      setFamilyLoading(true)
-      try {
-        const response = await fetch("/api/family", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            window.location.href = "/login" // Redirect to login
-            return
-          }
-          throw new Error("Failed to fetch family members")
+  // Fetch family members with TanStack Query
+  const { data: familyMembers, isLoading: familyLoading, error: familyError } = useQuery({
+    queryKey: ['family'],
+    queryFn: async () => {
+      const response = await fetch("/api/family", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.location.href = "/login"
+          throw new Error("Unauthorized. Please log in.")
         }
-
-        const data: Family[] = await response.json()
-        setFamilyMembers(data)
-      } catch (err) {
-        setFamilyError("An error occurred while fetching family members.")
-        console.error(err)
-      } finally {
-        setFamilyLoading(false)
+        throw new Error("Failed to fetch family members")
       }
-    }
+      return response.json()
+    },
+    refetchInterval: 120000 // Refetch every 1 minute
+  })
 
-    // Execute both fetches
-    fetchCameras()
-    fetchFamily()
-  }, [])
-
-  // Helper function to get emotion color
-  const getEmotionColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  // Helper function for emotion colors
+  const getEmotionColor = (emotion: string) => {
+    switch (emotion.toLowerCase()) {
       case "happy":
         return "bg-green-100 text-green-800 border-green-200"
       case "neutral":
@@ -116,8 +88,20 @@ export default function CamerasPage() {
     }
   }
 
-  // Render loading and error states
-  if (loading) {
+  // Helper function for status colors
+  const getStatusColor = (status: string) => {
+    switch (status.toUpperCase()) {
+      case "LOCKED":
+        return "bg-red-100 text-red-800 border-red-200"
+      case "UNLOCKED":
+        return "bg-green-100 text-green-800 border-green-200"
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200"
+    }
+  }
+
+  // Render loading state for cameras
+  if (loadingCameras) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-2">
@@ -128,12 +112,13 @@ export default function CamerasPage() {
     )
   }
 
-  if (error) {
+  // Render error state for cameras
+  if (camerasError) {
     return (
       <Card className="mx-auto max-w-md mt-8">
         <CardContent className="pt-6">
           <div className="text-center text-destructive">
-            <p>{error}</p>
+            <p>{(camerasError as Error).message}</p>
           </div>
         </CardContent>
       </Card>
@@ -160,7 +145,7 @@ export default function CamerasPage() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {cameras.map((camera) => (
+                  {cameras.map((camera: Camera) => (
                     <Card key={camera.id} className="overflow-hidden">
                       <div className="bg-muted h-32 flex items-center justify-center">
                         <svg
@@ -180,8 +165,17 @@ export default function CamerasPage() {
                       </div>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
-                          <h3 className="font-medium">{camera.name}</h3>
-                          <Button size="sm" variant="outline" onClick={() => setSelectedCameraId(camera.name)}>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium">{camera.name}</h3>
+                            <Badge className={getStatusColor(camera.status)}>
+                              {camera.status.charAt(0).toUpperCase() + camera.status.slice(1).toLowerCase()}
+                            </Badge>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => setSelectedCameraId(camera.name)}
+                          >
                             <Eye className="h-4 w-4 mr-1" />
                             View
                           </Button>
@@ -207,7 +201,7 @@ export default function CamerasPage() {
                 </div>
               ) : familyError ? (
                 <div className="text-center py-8 text-destructive">
-                  <p>{familyError}</p>
+                  <p>{(familyError as Error).message}</p>
                 </div>
               ) : familyMembers.length === 0 ? (
                 <div className="text-center py-8">
@@ -215,7 +209,7 @@ export default function CamerasPage() {
                 </div>
               ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {familyMembers.map((family) => (
+                  {familyMembers.map((family: Family) => (
                     <Card key={family.id} className="overflow-hidden">
                       <CardContent className="p-6">
                         <div className="flex flex-col items-center text-center gap-3">
@@ -230,7 +224,9 @@ export default function CamerasPage() {
                             <h3 className="font-medium text-lg">{family.name}</h3>
                             <p className="text-sm text-muted-foreground">{family.email}</p>
                           </div>
-                          <Badge className={`mt-2 ${getEmotionColor(family.status)}`}>{family.status}</Badge>
+                          <Badge className={`mt-2 ${getEmotionColor(family.emotion)}`}>
+                            {family.emotion}
+                          </Badge>
                         </div>
                       </CardContent>
                     </Card>
@@ -242,7 +238,7 @@ export default function CamerasPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Camera View (unchanged) */}
+      {/* Camera View */}
       {selectedCameraId && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-3xl mx-4">

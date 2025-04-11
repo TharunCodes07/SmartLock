@@ -20,7 +20,7 @@ interface FamilyMember {
   id: string
   name: string
   email: string
-  status: string
+  emotion: string
   userId: string
 }
 
@@ -99,8 +99,8 @@ export default function Profile() {
   }
 
   // Helper function to get emotion color
-  const getEmotionColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getEmotionColor = (emotion: string) => {
+    switch (emotion.toLowerCase()) {
       case "happy":
         return "bg-green-100 text-green-800 border-green-200"
       case "neutral":
@@ -205,8 +205,8 @@ export default function Profile() {
                               <h3 className="font-medium text-lg">{familyMember.name}</h3>
                               <p className="text-sm text-muted-foreground">{familyMember.email}</p>
                             </div>
-                            <Badge className={`mt-2 ${getEmotionColor(familyMember.status)}`}>
-                              {familyMember.status}
+                            <Badge className={`mt-2 ${getEmotionColor(familyMember.emotion)}`}>
+                              {familyMember.emotion}
                             </Badge>
                           </div>
                         </CardContent>
@@ -280,7 +280,7 @@ export default function Profile() {
       </div>
 
       {isModalOpen && session?.user?.id && (
-        <AddFamilyMemberModal userId={session.user.id} onClose={handleModalClose} onAdded={handleFamilyMemberAdded} />
+        <AddFamilyMemberModal onClose={handleModalClose} onAdded={handleFamilyMemberAdded} />
       )}
 
       {isCameraModalOpen && session?.user?.id && (

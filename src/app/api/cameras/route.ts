@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 
 // GET: Fetch user's cameras
+// File: app/api/cameras/route.ts
 export async function GET(request: NextRequest) {
   try {
     const session = await auth();
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest) {
       select: {
         id: true,
         name: true,
+        status: true, // Added to fetch lock status
       },
     });
 
@@ -29,7 +31,6 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
 // POST: Create new camera
 export async function POST(request: NextRequest) {
   try {
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
       data: {
         name: name.trim(),
         userId: session.user.id,
+        status: 'Unlocked',
       },
     });
 

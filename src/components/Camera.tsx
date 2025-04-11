@@ -12,7 +12,7 @@ export default function CameraView({ cameraId, onClose }: CameraViewProps) {
 
   useEffect(() => {
     // Connect to the server's viewer endpoint for this camera
-    const websocket = new WebSocket(`wss://ef7a-2401-4900-6337-aaef-e90f-bb90-6966-59b6.ngrok-free.app/view/${cameraId}`);
+    const websocket = new WebSocket(`wss://9aa5-2401-4900-4df9-ef18-a461-a1f3-1f3b-c908.ngrok-free.app/view/${cameraId}`);
 
     websocket.onmessage = (event) => {
       const jpgAsText = event.data;

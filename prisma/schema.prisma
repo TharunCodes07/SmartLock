@@ -18,18 +18,19 @@ model User {
 }
 
 model Family {
-  id     String @id @default(cuid())
-  name   String
-  status String
-  email  String
-  userId String
-  image  String
-  user   User   @relation(fields: [userId], references: [id])
+  id      String @id @default(cuid())
+  name    String
+  email   String
+  userId  String
+  image   String
+  user    User   @relation(fields: [userId], references: [id])
+  emotion String
 }
 
 model Camera {
-  id     String @id @default(cuid())
-  name   String @unique
+  id     String  @id @default(cuid())
+  name   String  @unique
   userId String
-  user   User   @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
+  status String?
 }
