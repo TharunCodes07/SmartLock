@@ -26,7 +26,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL")
-cameraId=3
+cameraId = 3
 WSS_URI = f"wss://9aa5-2401-4900-4df9-ef18-a461-a1f3-1f3b-c908.ngrok-free.app/camera/{cameraId}"  # e.g. wss://your-ngrok-url/camera/CAM_ID
 
 if not all([CURRENT_USER_ID, CAM_ID, SUPABASE_URL, SUPABASE_KEY, WSS_URI]):
@@ -159,10 +159,12 @@ async def main():
                     name = "Unknown"
                     emotion = "Unknown"
 
-                    matches = face_recognition.compare_faces(known_face_encodings, encoding)
+                    # Use a stricter tolerance of 0.5 instead of the default 0.6
+                    matches = face_recognition.compare_faces(known_face_encodings, encoding, tolerance=0.5)
                     face_distances = face_recognition.face_distance(known_face_encodings, encoding)
 
-                    if matches and matches[np.argmin(face_distances)]:
+                    # Add an explicit distance check for the closest match
+                    if matches and face_distances[np.argmin(face_distances)] < 0.5:
                         best = np.argmin(face_distances)
                         name = known_face_names[best]
 
