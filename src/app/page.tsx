@@ -47,7 +47,7 @@ export default function CamerasPage() {
       }
       return response.json()
     },
-    refetchInterval: 120000 // Refetch every 1 minute
+    refetchInterval: 1200000 // Refetch every 1 minute
   })
 
   // Fetch family members with TanStack Query
@@ -69,7 +69,7 @@ export default function CamerasPage() {
       }
       return response.json()
     },
-    refetchInterval: 120000 // Refetch every 1 minute
+    refetchInterval: 1200000 // Refetch every 1 minute
   })
 
   // Helper function for emotion colors
