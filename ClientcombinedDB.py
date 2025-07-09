@@ -27,7 +27,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 RECIPIENT_EMAIL = os.getenv("RECIPIENT_EMAIL")
 cameraId = 3
-WSS_URI = f"wss://9aa5-2401-4900-4df9-ef18-a461-a1f3-1f3b-c908.ngrok-free.app/camera/{cameraId}"  # e.g. wss://your-ngrok-url/camera/CAM_ID
+WSS_URI = f"wss://ae1d-103-5-112-80.ngrok-free.app/camera/{cameraId}"  # e.g. wss://your-ngrok-url/camera/CAM_ID
 
 if not all([CURRENT_USER_ID, CAM_ID, SUPABASE_URL, SUPABASE_KEY, WSS_URI]):
     print("Missing one or more required environment variables.")
@@ -168,7 +168,7 @@ async def main():
                         best = np.argmin(face_distances)
                         name = known_face_names[best]
 
-                        if not camera_unlocked:
+                        if not camera_unlocked and name != "Unknown":
                             supabase.table("Camera").update({"status": "Unlocked"}).eq("id", CAM_ID).execute()
                             print(f"[CAMERA] {CAM_ID} unlocked")
                             camera_unlocked = True
